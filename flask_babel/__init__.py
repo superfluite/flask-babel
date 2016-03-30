@@ -112,11 +112,38 @@ class Babel(object):
                 scientificformat=format_scientific,
             )
             app.jinja_env.add_extension('jinja2.ext.i18n')
+
+            def __ugettext(x):
+                translations = get_translations()
+                charset = translations.charset() 
+
+                if charset:
+                    try:
+                        x = unicode(x, charset)
+                    except TypeError:
+                        pass
+                    
+                return translations.ugettext(x)
+            
+            def __ungettext(s, p, n):
+                translations = get_translations()
+                charset = translations.charset()
+                
+                if charset:
+                    try:
+                        s = unicode(s, charset)
+                        p = unicode(p, charset)
+                        n = unicode(n, charset)
+                    except TypeError:
+                        pass
+                    
+                return translations.ungettext(s, p, n)
+            
             app.jinja_env.install_gettext_callables(
-                lambda x: get_translations().ugettext(x),
-                lambda s, p, n: get_translations().ungettext(s, p, n),
-                newstyle=True
+                __ugettext, __ungettext, newstyle=True
             )
+
+            del __ugettext, __ungettext
 
     def localeselector(self, f):
         """Registers a callback function for locale selection.  The default
