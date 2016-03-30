@@ -8,9 +8,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import unittest
 from decimal import Decimal
 import flask
-from datetime import datetime
+from datetime import datetime, timedelta
 import flask_babel as babel
-from flask_babel import gettext, ngettext, lazy_gettext
+from flask_babel import gettext, ngettext, lazy_gettext, format_timedelta
 from flask_babel._compat import text_type
 
 
@@ -106,6 +106,16 @@ class DateFormattingTestCase(unittest.TestCase):
             app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
             babel.refresh()
             assert babel.format_datetime(d) == 'Apr 12, 2010, 3:46:00 PM'
+
+    def test_format_timedelta(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app)
+        d = timedelta(12)
+        with app.test_request_context():
+            assert format_timedelta(d) == '2 weeks'
+            assert format_timedelta(d, threshold=2) == '12 days'
+            assert format_timedelta(d, add_direction=True) == 'in 2 weeks'
+            assert format_timedelta(-d, add_direction=True) == '2 weeks ago'
 
 
 class NumberFormattingTestCase(unittest.TestCase):
