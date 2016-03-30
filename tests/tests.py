@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import unittest
 from decimal import Decimal
 import flask
-from datetime import datetime
+from datetime import datetime, timedelta
 import flask_babel as babel
 from flask_babel import gettext, ngettext, lazy_gettext
 from flask_babel._compat import text_type
@@ -20,11 +20,14 @@ class DateFormattingTestCase(unittest.TestCase):
         app = flask.Flask(__name__)
         b = babel.Babel(app)
         d = datetime(2010, 4, 12, 13, 46)
+        delta = timedelta(6)
 
         with app.test_request_context():
             assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
             assert babel.format_date(d) == 'Apr 12, 2010'
             assert babel.format_time(d) == '1:46:00 PM'
+            assert babel.format_timedelta(delta) == '1 week'
+            assert babel.format_timedelta(delta, threshold=1) == '6 days'
 
         with app.test_request_context():
             app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
